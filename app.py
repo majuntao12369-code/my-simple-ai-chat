@@ -4,19 +4,18 @@ from openai import OpenAI
 
 app = Flask(__name__)
 
-# 🔥 关键修改：从环境变量读取 GitHub Token
+# 从环境变量读取 GitHub Token
 api_key = os.getenv("GITHUB_TOKEN")
 
-# GitHub Models 的配置
+# GitHub Models 的配置（不用改）
 GITHUB_MODELS_API_URL = "https://models.inference.ai.azure.com/chat/completions"
 GITHUB_MODELS_HEADERS = {
     "Authorization": f"Bearer {api_key}",
     "Content-Type": "application/json"
 }
 
-# 支持的模型列表（GitHub Models 免费提供）
-# 你可以换成其他模型，比如 "meta-llama/Meta-Llama-3-8B-Instruct"
-MODEL_NAME = "meta-llama/Meta-Llama-3-8B-Instruct"
+# 🔥 改用 Mistral 模型（这个名字是官方标准的，肯定能用）
+MODEL_NAME = "mistralai/Mistral-7B-Instruct-v0.2"
 
 @app.route('/')
 def index():
@@ -24,6 +23,10 @@ def index():
 
 @app.route('/chat', methods=['POST'])
 def chat():
+    # 检查 Key 是否存在
+    if not api_key:
+        return jsonify({"error": "服务器没配置 GitHub Token"}), 500
+    
     try:
         data = request.get_json()
         user_message = data.get('message')
@@ -31,13 +34,14 @@ def chat():
         if not user_message:
             return jsonify({"error": "消息不能为空"}), 400
         
-        # 🔥 关键：调用 GitHub Models API（格式和OpenAI几乎一样）
+        # 初始化客户端（使用 GitHub 的地址）
         client = OpenAI(
             api_key=api_key,
             base_url=GITHUB_MODELS_API_URL,
             default_headers=GITHUB_MODELS_HEADERS
         )
         
+        # 调用 API
         response = client.chat.completions.create(
             model=MODEL_NAME,
             messages=[
@@ -50,7 +54,8 @@ def chat():
         return jsonify({"reply": ai_reply})
     
     except Exception as e:
-        print(f"错误: {e}")
+        # 打印详细错误到日志，方便排查
+        print(f"错误详情: {e}")
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
