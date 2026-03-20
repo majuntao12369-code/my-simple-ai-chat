@@ -3,68 +3,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInput = document.getElementById('user-input');
     const sendBtn = document.getElementById('send-btn');
 
-    // 发送消息的函数
     const sendMessage = async () => {
-        const messageText = userInput.value.trim();
-        if (messageText === '') return;
+        const text = userInput.value.trim();
+        if (!text) return;
 
-        // 1. 在聊天框显示用户消息
-        addMessage(messageText, 'user-message');
+        addMessage(text, 'user-message');
         userInput.value = '';
         
-        // 显示“正在输入...”提示
-        const thinkingMessage = addMessage("AI 正在思考...", 'ai-message', true);
+        const thinkingMsg = addMessage("AI思考中...", 'ai-message', true);
 
         try {
-            // 2. 发送消息到后端
-            const response = await fetch('/chat', {
+            console.log("准备发送请求到 /chat");
+            const res = await fetch('/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: messageText }),
+                body: JSON.stringify({ message: text })
             });
-
-            if (!response.ok) throw new Error('网络响应错误');
-
-            const data = await response.json();
             
-            // 移除“正在输入...”提示
-            chatBox.removeChild(thinkingMessage);
+            console.log("收到响应，状态码:", res.status);
 
-            // 3. 在聊天框显示AI回复
+            chatBox.removeChild(thinkingMsg);
+
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}`);
+            }
+
+            const data = await res.json();
+            console.log("解析后的数据:", data);
+
             if (data.reply) {
                 addMessage(data.reply, 'ai-message');
             } else {
-                addMessage('抱歉，我好像出错了。', 'ai-message');
+                // 🔥 显示后端返回的具体错误
+                addMessage(`错误: ${data.error}`, 'ai-message');
             }
 
-        } catch (error) {
-            console.error('Error:', error);
-            chatBox.removeChild(thinkingMessage); // 出错也要移除提示
-            addMessage('抱歉，连接服务器失败。', 'ai-message');
+        } catch (err) {
+            console.error('捕获到错误:', err);
+            chatBox.removeChild(thinkingMsg);
+            addMessage(`连接失败: ${err.message}`, 'ai-message');
         }
     };
 
-    // 将消息添加到聊天框的函数
-    const addMessage = (text, className, isThinking = false) => {
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message', className);
-        if (isThinking) {
-            messageDiv.style.fontStyle = 'italic';
-            messageDiv.id = 'thinking-indicator'; // 给个id方便找到并删除
+    const addMessage = (text, cls, isThinking = false) => {
+        const div = document.createElement('div');
+        div.className = `message ${cls}`;
+        if(isThinking) { 
+            div.style.fontStyle = 'italic'; 
+            div.id = 'thinking'; 
         }
-        
-        const messageP = document.createElement('p');
-        messageP.textContent = text;
-        messageDiv.appendChild(messageP);
-        
-        chatBox.appendChild(messageDiv);
-        chatBox.scrollTop = chatBox.scrollHeight; // 自动滚动到底部
-        return messageDiv; // 返回创建的元素，方便之后删除
+        div.innerHTML = `<p>${text}</p>`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return div;
     };
 
-    // 绑定事件
-    sendBtn.addEventListener('click', sendMessage);
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
+    sendBtn.onclick = sendMessage;
+    userInput.onkeypress = (e) => e.key === 'Enter' && sendMessage();
 });
+
