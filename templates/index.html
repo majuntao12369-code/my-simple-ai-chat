@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的AI聊天工具</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>AI 聊天</h1>
+        </div>
+        <div class="chat-box" id="chat-box">
+            <!-- 聊天消息会在这里显示 -->
+            <div class="message ai-message">
+                <p>你好！有什么可以帮你的吗？</p>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="user-input" placeholder="在这里输入消息...">
+            <button id="send-btn">发送</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
