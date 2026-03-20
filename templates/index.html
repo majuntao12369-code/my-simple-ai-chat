@@ -4,25 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的AI聊天工具</title>
+    <!-- 引入样式文件 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <!-- 聊天容器 -->
     <div class="chat-container">
+        <!-- 头部 -->
         <div class="chat-header">
-            <h1>AI 聊天</h1>
+            <h1>🤖 AI 聊天助手</h1>
         </div>
+        
+        <!-- 聊天消息显示区域 -->
         <div class="chat-box" id="chat-box">
-            <!-- 聊天消息会在这里显示 -->
+            <!-- 初始欢迎消息 -->
             <div class="message ai-message">
-                <p>你好！有什么可以帮你的吗？</p>
+                <p>你好！我是你的AI助手，有什么可以帮你的吗？</p>
             </div>
         </div>
+        
+        <!-- 输入区域 -->
         <div class="chat-input-area">
-            <input type="text" id="user-input" placeholder="在这里输入消息...">
+            <input type="text" id="user-input" placeholder="在这里输入你的问题..." autocomplete="off">
             <button id="send-btn">发送</button>
         </div>
     </div>
 
+    <!-- 引入脚本文件 -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+    <!-- 调试信息（可选，小白可以忽略） -->
+    <script>
+        // 如果想在控制台看调试信息，取消下面的注释
+        // console.log('页面加载完成');
+    </script>
 </body>
 </html>
